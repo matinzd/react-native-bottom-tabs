@@ -1,7 +1,8 @@
-import type {
-  ParamListBase,
-  TabNavigationState,
-  Route,
+import {
+  type ParamListBase,
+  type TabNavigationState,
+  type Route,
+  CommonActions,
 } from '@react-navigation/native';
 import type {
   NativeBottomTabDescriptorMap,
@@ -40,14 +41,6 @@ export default function NativeBottomTabView({
             : (route as Route<string>).name;
       }}
       getBadge={({ route }) => descriptors[route.key]?.options.tabBarBadge}
-      getHidden={({ route }) => {
-        const options = descriptors[route.key]?.options;
-
-        return (
-          options?.tabBarItemHidden === true ||
-          options?.tabBarButton?.() === null
-        );
-      }}
       getIcon={({ route, focused }) => {
         const options = descriptors[route.key]?.options;
 
@@ -76,21 +69,16 @@ export default function NativeBottomTabView({
           return;
         }
 
-        const event = navigation.emit({
+        navigation.emit({
           type: 'tabPress',
           target: route.key,
           canPreventDefault: true,
         });
 
-        if (event.defaultPrevented) {
-          return;
-        } else {
-          navigation.navigate({
-            key: route.key,
-            name: route.name,
-            merge: true,
-          });
-        }
+        navigation.dispatch({
+          ...CommonActions.navigate(route),
+          target: state.key,
+        });
       }}
     />
   );
